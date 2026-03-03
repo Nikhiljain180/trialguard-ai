@@ -6,7 +6,32 @@ TrialGuard AI uses Bolna Voice AI to automate patient follow-up calls in clinica
 
 ## The Problem
 
-Clinical trials cost the pharmaceutical industry **$80B/year** globally. The #1 operational problem? **40% of patients drop out** before the trial ends. Every day of delay costs **$600K–$8M**. Today, research coordinators manually call hundreds of patients to collect symptom data, check medication adherence, and detect adverse events. It's expensive ($50–80/call), inconsistent, and unscalable.
+### The stakes
+
+Clinical trials are essential for drug discovery, but they come with significant challenges. Globally, the pharmaceutical industry invests approximately $80 billion each year in conducting clinical trials. These trials are not only expensive, but also time-consuming.
+
+Delays in clinical trials can be extremely costly. For every day a trial is delayed, sponsors can incur additional costs ranging from $600,000 to $8 million, depending on the phase of the trial. Therefore, finding ways to conduct clinical trials faster and more efficiently is crucial for both reducing costs and accelerating the delivery of new therapies to patients.
+
+### The core problem: patient dropout
+
+The biggest operational challenge is **patient retention**. Roughly **40% of patients drop out** before a trial completes. When patients leave, you lose data, skew results, and often have to recruit and enroll replacements—adding months of delay and millions in cost.
+
+### How trials manage this today
+
+To keep patients engaged and collect needed data, research coordinators **manually call hundreds of patients** throughout the trial. On each call they:
+
+- Collect symptom data (nausea, headache, energy, etc.)
+- Verify medication adherence (morning and evening doses)
+- Screen for adverse events
+- Check motivation and flag dropout risk
+
+### Why this approach fails
+
+The manual model has three major flaws:
+
+1. **Expensive** — Each follow-up call costs **$50–80** in staff time.
+2. **Inconsistent** — Calls vary by coordinator; questions are asked differently; data quality is uneven.
+3. **Unscalable** — A coordinator can realistically handle **15–20 patients per day**. Large trials with hundreds of patients cannot be supported this way.
 
 ## Solution
 
