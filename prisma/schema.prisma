@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id             String   @id @default(cuid())
+  name           String
+  phone          String
+  email          String?
+  trialArm       String   // "treatment" or "placebo"
+  enrollmentDate DateTime
+  trialDay       Int      @default(1)
+  status         String   @default("active") // active, completed, withdrawn, flagged
+  dropoutRisk    String   @default("low") // low, medium, high
+  calls          Call[]
+  alerts         Alert[]
+  createdAt      DateTime @default(now())
+}
+
+model Call {
+  id              String    @id @default(cuid())
+  patientId       String
+  patient         Patient   @relation(fields: [patientId], references: [id])
+  bolnaCallId     String?
+  status          String    @default("scheduled") // scheduled, in_progress, completed, failed
+  trialDay        Int
+  nausea          String? // none, mild, moderate, severe
+  headache        String? // none, mild, moderate, severe
+  energyLevel     String? // low, moderate, high
+  otherSymptoms   String?
+  morningDose     Boolean?
+  eveningDose     Boolean?
+  adverseEvent    String?
+  adverseSeverity Int?
+  motivation      Int? // 1-5 scale
+  transcript      String?
+  duration        Int? // seconds
+  outcome         String? // completed, no_answer, voicemail, dropout_risk, adverse_event
+  calledAt        DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+}
+
+model Alert {
+  id         String    @id @default(cuid())
+  patientId  String
+  patient    Patient   @relation(fields: [patientId], references: [id])
+  callId     String?
+  type       String // adverse_event, dropout_risk, missed_dose, no_answer
+  severity   String // low, medium, high, critical
+  message    String
+  resolved   Boolean   @default(false)
+  resolvedAt DateTime?
+  createdAt  DateTime  @default(now())
+}
