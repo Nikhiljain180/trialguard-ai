@@ -47,10 +47,13 @@ export async function POST(req: NextRequest) {
       lastSymptoms,
     });
 
+    const bolnaCallId = (bolnaResponse as { call_id?: string; id?: string }).call_id || (bolnaResponse as { call_id?: string; id?: string }).id || null;
+    console.log("[Calls] Bolna response - call_id:", (bolnaResponse as { call_id?: string }).call_id, "id:", (bolnaResponse as { id?: string }).id, "storing:", bolnaCallId);
+
     await prisma.call.update({
       where: { id: call.id },
       data: {
-        bolnaCallId: bolnaResponse.call_id || bolnaResponse.id || null,
+        bolnaCallId,
         status: "in_progress",
       },
     });
@@ -58,7 +61,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       callId: call.id,
-      bolnaCallId: bolnaResponse.call_id || bolnaResponse.id,
+      bolnaCallId,
       message: `Call initiated to ${patient.name}`,
     });
   } catch (error) {
