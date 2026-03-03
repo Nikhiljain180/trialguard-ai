@@ -40,8 +40,10 @@ model Call {
   adverseSeverity Int?
   motivation      Int? // 1-5 scale
   transcript      String?
-  duration        Int? // seconds
-  outcome         String? // completed, no_answer, voicemail, dropout_risk, adverse_event
+  summary         String?  // AI-generated call summary from Bolna
+  recordingUrl    String?  // URL to call recording
+  duration        Int?     // seconds
+  outcome         String?  // completed, no_answer, voicemail, dropout_risk, adverse_event
   calledAt        DateTime?
   completedAt     DateTime?
   createdAt       DateTime  @default(now())

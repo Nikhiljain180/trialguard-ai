@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   XCircle,
   PhoneCall,
+  RefreshCw,
 } from "lucide-react";
 import {
   LineChart,
@@ -89,11 +90,15 @@ export default function PatientDetailPage({
   const [callMsg, setCallMsg] = useState<string | null>(null);
   const [expandedCall, setExpandedCall] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadPatient = () => {
     fetch(`/api/patients/${id}`)
       .then((r) => r.json())
       .then(setPatient)
       .catch(console.error);
+  };
+
+  useEffect(() => {
+    loadPatient();
   }, [id]);
 
   const triggerCall = async () => {
@@ -107,8 +112,7 @@ export default function PatientDetailPage({
       });
       const data = await res.json();
       setCallMsg(data.message || data.error);
-      const updated = await fetch(`/api/patients/${id}`).then((r) => r.json());
-      setPatient(updated);
+      loadPatient();
     } catch {
       setCallMsg("Failed to initiate call");
     } finally {
@@ -193,14 +197,25 @@ export default function PatientDetailPage({
             </Badge>
           </div>
         </div>
-        <Button onClick={triggerCall} disabled={calling}>
-          {calling ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Phone className="mr-2 h-4 w-4" />
-          )}
-          Call Now
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadPatient}
+            disabled={!patient}
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Refresh
+          </Button>
+          <Button onClick={triggerCall} disabled={calling}>
+            {calling ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Phone className="mr-2 h-4 w-4" />
+            )}
+            Call Now
+          </Button>
+        </div>
       </div>
 
       {callMsg && (
@@ -334,6 +349,12 @@ export default function PatientDetailPage({
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {patient.calls.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-8">
+              No calls yet. Click &quot;Call Now&quot; to trigger a follow-up call, then
+              click &quot;Refresh&quot; after the call ends to see the results.
+            </p>
+          ) : (
           <div className="space-y-4">
             {[...patient.calls].reverse().map((call) => (
               <div key={call.id} className="relative border-l-2 border-slate-200 pl-4 pb-4">
@@ -438,6 +459,7 @@ export default function PatientDetailPage({
               </div>
             ))}
           </div>
+          )}
         </CardContent>
       </Card>
 

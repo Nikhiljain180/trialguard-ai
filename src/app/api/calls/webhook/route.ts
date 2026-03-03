@@ -17,6 +17,18 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // Fallback: match by recipient phone from Bolna payload
+  if (!call) {
+    const recipientPhone = (payload as { context_details?: { recipient_phone_number?: string } }).context_details?.recipient_phone_number;
+    if (recipientPhone) {
+      const patient = await prisma.patient.findFirst({
+        where: { phone: recipientPhone },
+        include: { calls: { where: { status: "in_progress" }, orderBy: { createdAt: "desc" }, take: 1 } },
+      });
+      call = patient?.calls[0] ?? null;
+    }
+  }
+
   if (!call) {
     return NextResponse.json({ error: "No matching call found" }, { status: 404 });
   }
@@ -25,6 +37,7 @@ export async function POST(req: NextRequest) {
     where: { id: call.id },
     data: {
       status: "completed",
+      ...(parsed.bolnaCallId && !call.bolnaCallId && { bolnaCallId: parsed.bolnaCallId }),
       nausea: parsed.nausea,
       headache: parsed.headache,
       energyLevel: parsed.energyLevel,
@@ -35,6 +48,8 @@ export async function POST(req: NextRequest) {
       adverseSeverity: parsed.adverseSeverity,
       motivation: parsed.motivation,
       transcript: parsed.transcript,
+      summary: parsed.summary,
+      recordingUrl: parsed.recordingUrl,
       duration: parsed.duration,
       outcome: parsed.outcome,
       completedAt: new Date(),

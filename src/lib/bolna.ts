@@ -20,10 +20,14 @@ interface BolnaCallResponse {
 
 interface WebhookPayload {
   call_id?: string;
+  id?: string;
   agent_id?: string;
   status?: string;
   transcript?: string;
+  summary?: string;
   duration?: number;
+  conversation_duration?: number;
+  telephony_data?: { recording_url?: string };
   extracted_data?: {
     nausea?: string;
     headache?: string;
@@ -43,6 +47,8 @@ interface ParsedCallData {
   bolnaCallId: string;
   status: string;
   transcript: string | null;
+  summary: string | null;
+  recordingUrl: string | null;
   duration: number | null;
   nausea: string | null;
   headache: string | null;
@@ -77,14 +83,18 @@ async function bolnaFetch(path: string, options: RequestInit = {}) {
 export async function makeCall(params: MakeCallParams): Promise<BolnaCallResponse> {
   const agentId = params.agentId || BOLNA_AGENT_ID;
 
+  const contextData = {
+    patient_name: params.patientName,
+    trial_day: String(params.trialDay),
+    last_symptoms: params.lastSymptoms || "None reported",
+  };
+
   const body = {
     agent_id: agentId,
     recipient_phone_number: params.recipientPhone,
-    user_data: {
-      patient_name: params.patientName,
-      trial_day: String(params.trialDay),
-      last_symptoms: params.lastSymptoms || "None reported",
-    },
+    user_data: contextData,
+    // Bolna may also expect recipient_data for agent variables (patient_name, trial_day, last_symptoms)
+    recipient_data: contextData,
   };
 
   return bolnaFetch(`/call`, {
@@ -107,11 +117,19 @@ export function parseWebhook(payload: WebhookPayload): ParsedCallData {
     outcome = "dropout_risk";
   }
 
+  // Bolna sends "id" for call ID, "conversation_duration" for duration
+  const callId = payload.call_id ?? payload.id ?? "";
+  const duration = payload.duration ?? (payload as { conversation_duration?: number }).conversation_duration ?? null;
+
+  const recordingUrl = payload.telephony_data?.recording_url || null;
+
   return {
-    bolnaCallId: payload.call_id || "",
+    bolnaCallId: typeof callId === "string" ? callId : String(callId),
     status: payload.status || "completed",
     transcript: payload.transcript || null,
-    duration: payload.duration || null,
+    summary: payload.summary || null,
+    recordingUrl,
+    duration: duration != null ? Math.round(duration) : null,
     nausea: extracted.nausea || null,
     headache: extracted.headache || null,
     energyLevel: extracted.energy_level || null,
